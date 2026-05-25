@@ -15,6 +15,12 @@ The trained model is exposed through a FastAPI application with:
 - Docker support for consistent local and cloud execution
 - A GitHub Actions workflow for building, pushing, and deploying the API container
 
+## Project Architecture
+
+The project follows a simple MLOps flow from raw customer data through model training, API serving, containerization, and AWS deployment automation.
+
+![MLOps churn prediction project architecture](screenshots/architecture_diagram.png)
+
 ## Business Problem
 
 Customer retention is often more cost-effective than customer acquisition. For telecom providers, early churn detection enables business teams to:
