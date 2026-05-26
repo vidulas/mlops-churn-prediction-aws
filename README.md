@@ -1,40 +1,37 @@
 # End-to-End MLOps Pipeline for Customer Churn Prediction on AWS
 
-This project demonstrates an end-to-end MLOps workflow for predicting customer churn using the Telco Customer Churn dataset. It covers data preprocessing, model training, model evaluation, API serving with FastAPI, containerization with Docker, and an AWS deployment plan using Amazon ECR, EC2, and GitHub Actions.
+This repository demonstrates a complete, portfolio-ready MLOps workflow for customer churn prediction. It covers model training, model comparison, API serving, Docker containerization, AWS deployment, and manual CI/CD deployment with GitHub Actions.
 
-The goal is to present a practical, portfolio-ready machine learning system that can be trained locally, packaged as a production-style API, and deployed to cloud infrastructure through a repeatable CI/CD workflow.
+The final system serves a trained Telco churn prediction model through a FastAPI REST API. The application is packaged as a Docker image, pushed to Amazon ECR, deployed on an Amazon Linux 2023 EC2 instance, and exposed on port `8000`.
 
 ## Project Overview
 
-Customer churn prediction helps subscription-based businesses identify customers who are likely to cancel their service. This project trains and serves a binary classification model that predicts whether a customer is likely to churn based on demographic, account, billing, and service usage attributes.
+Customer churn prediction helps subscription-based businesses identify customers who are likely to cancel their service. This project builds an end-to-end machine learning service that predicts churn risk from customer demographic, billing, account, and service usage features.
 
-The trained model is exposed through a FastAPI application with:
+Completed project scope:
 
-- A health-check endpoint for operational monitoring
-- A prediction endpoint for real-time churn inference
-- Docker support for consistent local and cloud execution
-- A GitHub Actions workflow for building, pushing, and deploying the API container
-
-## Project Architecture
-
-The project follows a simple MLOps flow from raw customer data through model training, API serving, containerization, and AWS deployment automation.
-
-![MLOps churn prediction project architecture](screenshots/architecture_diagram.png)
+- Trained churn prediction models using the Telco Customer Churn dataset
+- Compared Logistic Regression and Random Forest classifiers
+- Selected Logistic Regression as the final model based on F1-score and ROC-AUC
+- Saved the trained model artifact as `models/churn_model.pkl`
+- Built a FastAPI API with `/health` and `/predict` endpoints
+- Containerized the API with Docker
+- Tested the API locally and inside Docker
+- Created an Amazon ECR repository named `telco-churn-api`
+- Pushed the Docker image to Amazon ECR
+- Deployed the containerized API on AWS EC2 using Amazon Linux 2023
+- Configured GitHub Actions secrets for AWS and EC2 deployment
+- Successfully ran a manual GitHub Actions workflow to build, push, and deploy the application
 
 ## Business Problem
 
-Customer retention is often more cost-effective than customer acquisition. For telecom providers, early churn detection enables business teams to:
+Customer retention is often more cost-effective than customer acquisition. For telecom providers, early churn detection helps business teams identify high-risk customers before they leave, prioritize retention campaigns, and reduce preventable revenue loss.
 
-- Identify high-risk customers before they leave
-- Prioritize retention campaigns and customer success outreach
-- Understand which customer segments are more likely to churn
-- Reduce revenue loss caused by preventable cancellations
-
-The model output can support a retention workflow by assigning each customer a churn probability and risk label.
+The API returns both a churn prediction and a churn probability, making it suitable for downstream business workflows such as customer success outreach, retention prioritization, and churn risk dashboards.
 
 ## Dataset Description
 
-This project uses the Telco Customer Churn dataset, which contains 7,043 customer records. Each row represents one customer and includes service, account, and billing information.
+This project uses the Telco Customer Churn dataset, which contains 7,043 customer records. Each row represents one customer and includes service subscriptions, account details, billing information, and a churn label.
 
 Key feature groups:
 
@@ -44,15 +41,7 @@ Key feature groups:
 - Billing: `MonthlyCharges`, `TotalCharges`
 - Target variable: `Churn`, with values `Yes` or `No`
 
-Preprocessing steps include:
-
-- Dropping `customerID`
-- Converting `TotalCharges` to a numeric field
-- Encoding the target variable as `1` for churn and `0` for no churn
-- Imputing missing values
-- One-hot encoding categorical variables
-- Scaling numerical variables
-- Stratified train/test split
+Preprocessing includes dropping `customerID`, converting `TotalCharges` to numeric format, encoding the target variable, handling missing values, one-hot encoding categorical features, scaling numerical features, and using a stratified train/test split.
 
 ## Tech Stack
 
@@ -65,8 +54,24 @@ Preprocessing steps include:
 | API | FastAPI, Uvicorn, Pydantic |
 | Containerization | Docker |
 | Cloud registry | Amazon ECR |
-| Cloud compute | Amazon EC2 |
+| Cloud compute | Amazon EC2, Amazon Linux 2023 |
 | CI/CD | GitHub Actions |
+
+## Final Architecture
+
+The completed architecture follows a practical MLOps deployment flow from local model development to cloud-hosted API serving.
+
+![MLOps churn prediction project architecture](screenshots/architecture_diagram.png)
+
+Workflow:
+
+1. Train and evaluate churn prediction models locally.
+2. Save the selected model as `models/churn_model.pkl`.
+3. Serve predictions through a FastAPI application.
+4. Build a Docker image for the API.
+5. Push the image to Amazon ECR repository `telco-churn-api`.
+6. Pull and run the image on an AWS EC2 instance.
+7. Use GitHub Actions `workflow_dispatch` to manually build, push, and redeploy the latest container.
 
 ## Folder Structure
 
@@ -87,10 +92,14 @@ Preprocessing steps include:
 |-- reports/
 |   `-- metrics.json
 |-- screenshots/
+|   |-- architecture_diagram.png
+|   |-- aws_ec2_health_check (1).png
+|   |-- aws_ec2_prediction_test.png (2).png
 |   |-- docker_health_check.png
 |   |-- docker_prediction_test.png.png
 |   |-- fastapi_health_check.png.png
-|   `-- fastapi_prediction_test.png.png
+|   |-- fastapi_prediction_test.png.png
+|   `-- github_actions_success.png.png
 |-- src/
 |   |-- preprocess.py
 |   `-- train.py
@@ -100,37 +109,30 @@ Preprocessing steps include:
 `-- requirements.txt
 ```
 
-## Model Training Results
+## Model Results
 
-Two baseline classification models were trained and evaluated using accuracy, precision, recall, F1-score, and ROC-AUC.
+Two classification models were trained and evaluated using accuracy, precision, recall, F1-score, and ROC-AUC.
 
 | Model | Accuracy | Precision | Recall | F1-Score | ROC-AUC |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Logistic Regression | 0.8055 | 0.6572 | 0.5588 | 0.6040 | 0.8419 |
 | Random Forest | 0.7821 | 0.6143 | 0.4813 | 0.5397 | 0.8211 |
 
-The best model based on F1-score was **Logistic Regression**.
-
 ## Why Logistic Regression Was Selected
 
-Logistic Regression was selected because it provided the strongest overall evaluation results for this baseline pipeline. It achieved higher accuracy, precision, recall, F1-score, and ROC-AUC than the Random Forest model in the current experiment.
+Logistic Regression was selected as the final model because it achieved the best overall performance in this experiment. It outperformed Random Forest across all tracked metrics, including F1-score and ROC-AUC.
 
-It is also a strong choice for a portfolio MLOps project because it is:
+This makes Logistic Regression a strong production baseline for the current project because it is interpretable, fast to serve, lightweight in a containerized API, and well suited to tabular binary classification.
 
-- Interpretable and easy to explain to business stakeholders
-- Fast to train and lightweight to serve through an API
-- Well suited for tabular binary classification problems
-- Stable as a baseline model for future experimentation
+## API Endpoint Documentation
 
-## FastAPI Endpoint Documentation
-
-Run the API locally with:
+Run the API locally:
 
 ```powershell
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Interactive API documentation is available at:
+Interactive API documentation:
 
 ```text
 http://localhost:8000/docs
@@ -234,7 +236,7 @@ Start the API:
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-## Docker Build and Run
+## Docker Local Build and Run
 
 Build the Docker image:
 
@@ -248,66 +250,38 @@ Run the Docker container:
 docker run --rm -p 8000:8000 telco-churn-api
 ```
 
-Open the API documentation:
-
-```text
-http://localhost:8000/docs
-```
-
 Test the containerized health endpoint:
 
 ```powershell
 curl http://localhost:8000/health
 ```
 
-## Screenshots
+Open the interactive API documentation:
 
-The `screenshots/` folder contains evidence of local API and Docker-based testing.
-
-### FastAPI Health Check
-
-![FastAPI health check](screenshots/fastapi_health_check.png.png)
-
-### FastAPI Prediction Test
-
-![FastAPI prediction test](screenshots/fastapi_prediction_test.png.png)
-
-### Docker Health Check
-
-![Docker health check](screenshots/docker_health_check.png)
-
-### Docker Prediction Test
-
-![Docker prediction test](screenshots/docker_prediction_test.png.png)
-
-## AWS Deployment Plan
-
-The deployment plan uses Amazon ECR as the container registry, Amazon EC2 as the compute environment, and GitHub Actions as the CI/CD automation layer.
-
-### 1. Build and Test Locally
-
-Train the model, run the FastAPI app, and verify `/health` and `/predict` locally.
-
-```powershell
-python src\train.py
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```text
+http://localhost:8000/docs
 ```
 
-### 2. Create an Amazon ECR Repository
+## AWS Deployment with ECR and EC2
 
-Create a private ECR repository for the API image.
+The application has been deployed to AWS using Amazon ECR for image storage and Amazon EC2 for container hosting.
+
+Deployment summary:
+
+1. Created an Amazon ECR repository named `telco-churn-api`.
+2. Built the Docker image locally and through GitHub Actions.
+3. Tagged and pushed the image to Amazon ECR.
+4. Created an Amazon Linux 2023 EC2 instance.
+5. Installed and started Docker on EC2.
+6. Pulled the latest ECR image on EC2.
+7. Ran the API container on port `8000`.
+8. Verified `/health` and `/predict` from the EC2 public endpoint.
+
+Example ECR workflow:
 
 ```powershell
-aws ecr create-repository `
-  --repository-name telco-churn-api `
-  --region us-east-1
-```
-
-### 3. Build, Tag, and Push the Docker Image
-
-```powershell
-$AWS_REGION = "us-east-1"
-$AWS_ACCOUNT_ID = "123456789012"
+$AWS_REGION = "your-aws-region"
+$AWS_ACCOUNT_ID = "your-aws-account-id"
 $ECR_REPOSITORY = "telco-churn-api"
 $IMAGE_TAG = "latest"
 $ECR_URI = "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY"
@@ -321,54 +295,60 @@ docker tag ${ECR_REPOSITORY}:${IMAGE_TAG} ${ECR_URI}:${IMAGE_TAG}
 docker push ${ECR_URI}:${IMAGE_TAG}
 ```
 
-### 4. Prepare the EC2 Instance
-
-Launch an EC2 instance, install Docker, and allow inbound traffic on port `8000`.
+Example EC2 setup commands:
 
 ```bash
 sudo yum update -y
 sudo yum install -y docker
 sudo systemctl start docker
 sudo systemctl enable docker
-sudo usermod -aG docker ec2-user
 ```
 
-Reconnect to the instance after adding `ec2-user` to the Docker group.
-
-### 5. Run the API Container on EC2
+Example EC2 container deployment:
 
 ```bash
-aws ecr get-login-password --region us-east-1 | docker login \
+aws ecr get-login-password --region your-aws-region | sudo docker login \
   --username AWS \
-  --password-stdin 123456789012.dkr.ecr.us-east-1.amazonaws.com
+  --password-stdin your-account-id.dkr.ecr.your-aws-region.amazonaws.com
 
-docker pull 123456789012.dkr.ecr.us-east-1.amazonaws.com/telco-churn-api:latest
+sudo docker pull your-account-id.dkr.ecr.your-aws-region.amazonaws.com/telco-churn-api:latest
 
-docker run -d \
+sudo docker stop telco-churn-api || true
+sudo docker rm telco-churn-api || true
+sudo docker run -d \
   --name telco-churn-api \
   -p 8000:8000 \
-  123456789012.dkr.ecr.us-east-1.amazonaws.com/telco-churn-api:latest
+  your-account-id.dkr.ecr.your-aws-region.amazonaws.com/telco-churn-api:latest
 ```
 
-After deployment, the API can be accessed at:
+After deployment, the API is available at:
 
 ```text
 http://<ec2-public-ip>:8000/docs
 ```
 
-### 6. Automate Deployment with GitHub Actions
+No AWS credentials, SSH private keys, or account-specific secrets are stored in this repository.
 
-The repository includes `.github/workflows/deploy.yml`, which is designed to:
+## GitHub Actions CI/CD
 
-- Check out the repository
-- Configure AWS credentials
-- Log in to Amazon ECR
-- Build and tag the Docker image
-- Push the image to ECR
-- SSH into EC2
-- Pull and restart the latest container
+The repository includes a manual deployment workflow at `.github/workflows/deploy.yml`.
 
-Required GitHub repository secrets:
+The workflow is triggered with `workflow_dispatch`, so deployment is started manually from the GitHub Actions tab. This gives controlled deployment behavior while still automating the full release process.
+
+The workflow performs the following steps:
+
+1. Checks out the repository.
+2. Configures AWS credentials from GitHub Actions secrets.
+3. Logs in to Amazon ECR.
+4. Builds the Docker image.
+5. Tags the image as `latest`.
+6. Pushes the image to ECR repository `telco-churn-api`.
+7. Connects to the EC2 instance over SSH.
+8. Pulls the latest image from ECR.
+9. Stops and removes the previous container if it exists.
+10. Runs the updated container on port `8000`.
+
+Required GitHub Actions secrets:
 
 | Secret | Purpose |
 | --- | --- |
@@ -376,20 +356,55 @@ Required GitHub repository secrets:
 | `AWS_SECRET_ACCESS_KEY` | IAM secret access key used by GitHub Actions |
 | `AWS_REGION` | AWS region for ECR and deployment |
 | `EC2_HOST` | Public IP address or DNS name of the EC2 instance |
-| `EC2_USERNAME` | SSH username, such as `ec2-user` |
-| `EC2_SSH_KEY` | Private SSH key used to connect to EC2 |
+| `EC2_USERNAME` | SSH username for the EC2 instance |
+| `EC2_SSH_KEY` | Private SSH key used by GitHub Actions to connect to EC2 |
 
-The workflow currently runs through `workflow_dispatch`, which allows deployment to be triggered manually from the GitHub Actions tab.
+The deployment commands use `sudo docker` on EC2 to avoid Docker daemon permission errors during automated deployment.
+
+## Screenshots
+
+The `screenshots/` folder contains evidence of local testing, Docker testing, AWS EC2 deployment, and GitHub Actions deployment success.
+
+### Local FastAPI Health Check
+
+![FastAPI health check](screenshots/fastapi_health_check.png.png)
+
+### Local FastAPI Prediction Test
+
+![FastAPI prediction test](screenshots/fastapi_prediction_test.png.png)
+
+### Docker Health Check
+
+![Docker health check](screenshots/docker_health_check.png)
+
+### Docker Prediction Test
+
+![Docker prediction test](screenshots/docker_prediction_test.png.png)
+
+### AWS EC2 Health Check
+
+![AWS EC2 health check](<screenshots/aws_ec2_health_check (1).png>)
+
+### AWS EC2 Prediction Test
+
+![AWS EC2 prediction test](<screenshots/aws_ec2_prediction_test.png (2).png>)
+
+### GitHub Actions Successful Deployment
+
+![GitHub Actions successful deployment](screenshots/github_actions_success.png.png)
+
+## Troubleshooting
+
+| Issue | Cause | Fix |
+| --- | --- | --- |
+| Scikit-learn version mismatch | The model was trained with a different Scikit-learn version than the runtime environment. | Pinned `scikit-learn==1.5.1` in `requirements.txt` so the training and serving environments use the same version. |
+| GitHub Actions SSH timeout | The EC2 security group did not allow the required SSH access from the workflow runner. | Updated the EC2 security group inbound rules to allow SSH access for deployment. |
+| Docker daemon permission error on EC2 | The deployment user could not run Docker commands without elevated permissions. | Updated `deploy.yml` to use `sudo docker` for EC2 deployment commands. |
 
 ## Future Improvements
 
+- Add HTTPS and a custom domain name
+- Add monitoring and structured logging
 - Add automated tests for preprocessing, model loading, and API responses
-- Track experiments with MLflow or another experiment tracking tool
-- Add data and model versioning with DVC or cloud object storage
-- Improve model performance with hyperparameter tuning and additional algorithms
-- Add feature importance reporting for stakeholder-facing model interpretation
-- Add request logging and monitoring for production observability
-- Deploy behind a reverse proxy with HTTPS
-- Add authentication or API key validation for protected prediction access
-- Extend CI/CD to run tests before building and deploying the image
-- Consider ECS, App Runner, or SageMaker for more scalable production deployment
+- Add a model retraining pipeline
+- Restrict EC2 security group rules for production use
